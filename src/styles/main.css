@@ -1,0 +1,1650 @@
+/* Minecraft Web Edition Stylesheet */
+
+:root {
+  --mc-font: 'Press Start 2P', 'Silkscreen', monospace;
+  --mc-bg-dark: #121212;
+  --mc-btn-bg: #7f7f7f;
+  --mc-btn-border-light: #b0b0b0;
+  --mc-btn-border-dark: #3a3a3a;
+  --mc-btn-hover: #9c9c9c;
+  --mc-btn-active: #5c5c5c;
+  --mc-window-bg: #c6c6c6;
+  --mc-window-border-light: #ffffff;
+  --mc-window-border-dark: #555555;
+  --mc-slot-bg: #8b8b8b;
+  --mc-slot-border-dark: #373737;
+  --mc-slot-border-light: #ffffff;
+  --mc-xp-green: #7fff00;
+  --mc-yellow-splash: #ffff55;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+  font-family: var(--mc-font);
+  image-rendering: pixelated;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #000;
+  color: #fff;
+  font-size: 14px;
+}
+
+/* 3D WebGL Canvas */
+#game-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#webgl-canvas {
+  width: 100vw !important;
+  height: 100vh !important;
+  display: block !important;
+  object-fit: fill !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Screen Overlays */
+.screen-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 5;
+}
+
+#hurt-overlay {
+  background: radial-gradient(circle, transparent 40%, rgba(255, 0, 0, 0.6) 100%);
+  opacity: 0;
+  transition: opacity 0.1s ease-out;
+}
+
+#hurt-overlay.flash {
+  opacity: 1;
+}
+
+#water-overlay {
+  background: rgba(10, 40, 90, 0.45);
+  backdrop-filter: blur(1px);
+}
+
+#vignette-overlay {
+  background: radial-gradient(circle, transparent 65%, rgba(0, 0, 0, 0.5) 100%);
+}
+
+/* HUD */
+#hud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+#crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  mix-blend-mode: difference;
+}
+
+#crosshair::before, #crosshair::after {
+  content: '';
+  position: absolute;
+  background: #fff;
+}
+
+#crosshair::before {
+  top: 7px;
+  left: 0;
+  width: 16px;
+  height: 2px;
+}
+
+#crosshair::after {
+  top: 0;
+  left: 7px;
+  width: 2px;
+  height: 16px;
+}
+
+/* Item Name Tooltip popup */
+.item-label {
+  position: absolute;
+  bottom: 85px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #ffffff;
+  text-shadow: 2px 2px #000;
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.item-label.show {
+  opacity: 1;
+}
+
+/* Status Bars: Health & Hunger */
+#status-bars {
+  position: absolute;
+  bottom: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 364px;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.bars-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+#armor-bar {
+  margin-bottom: 2px;
+}
+
+.stat-bar {
+  display: flex;
+  gap: 2px;
+}
+
+.player-avatar-box {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-right: 12px;
+}
+
+.armor-slots-column {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.armor-slot {
+  position: relative;
+  background: rgba(45, 45, 45, 0.7);
+}
+
+.armor-slot::before {
+  content: '';
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  opacity: 0.35;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+}
+
+.armor-slot[data-armor-slot="0"]::before { content: '🪖'; }
+.armor-slot[data-armor-slot="1"]::before { content: '🛡️'; }
+.armor-slot[data-armor-slot="2"]::before { content: '👖'; }
+.armor-slot[data-armor-slot="3"]::before { content: '👢'; }
+
+.stat-icon {
+  width: 16px;
+  height: 16px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+
+/* Experience Bar */
+#exp-container {
+  position: absolute;
+  bottom: 44px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 364px;
+  height: 8px;
+  background: #2a2a2a;
+  border: 1px solid #111;
+  pointer-events: none;
+}
+
+#exp-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(to bottom, #9dff00, #55aa00);
+  transition: width 0.2s ease;
+}
+
+#exp-level {
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 13px;
+  color: var(--mc-xp-green);
+  text-shadow: 1px 1px #000, -1px -1px #000, 1px -1px #000, -1px 1px #000;
+}
+
+/* Hotbar */
+#hotbar-container {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: auto;
+}
+
+.minecraft-bar {
+  display: flex;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 2px;
+  border: 2px solid #333;
+  border-radius: 2px;
+  gap: 2px;
+}
+
+.hotbar-slot {
+  width: 40px;
+  height: 40px;
+  background: rgba(139, 139, 139, 0.6);
+  border: 2px solid;
+  border-color: #373737 #ffffff #ffffff #373737;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+}
+
+.hotbar-slot.active {
+  border-color: #ffffff #555555 #555555 #ffffff;
+  box-shadow: 0 0 0 2px #ffffff;
+  transform: scale(1.05);
+  z-index: 2;
+}
+
+.slot-icon {
+  width: 30px;
+  height: 30px;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+
+.slot-count {
+  position: absolute;
+  bottom: 2px;
+  right: 4px;
+  font-size: 11px;
+  color: #fff;
+  text-shadow: 1px 1px #000, -1px -1px #000, 1px -1px #000, -1px 1px #000;
+  pointer-events: none;
+}
+
+.durability-bar-container {
+  position: absolute;
+  bottom: 2px;
+  left: 3px;
+  right: 3px;
+  height: 2px;
+  background: #000000;
+  pointer-events: none;
+}
+
+.durability-bar-fill {
+  height: 100%;
+  background: #55ff55;
+  transition: width 0.1s;
+}
+
+/* Buttons in Minecraft Style */
+.mc-btn {
+  background: #747474;
+  border: 2px solid;
+  border-color: #a0a0a0 #3c3c3c #3c3c3c #a0a0a0;
+  color: #e0e0e0;
+  padding: 10px 18px;
+  font-size: 13px;
+  cursor: pointer;
+  text-shadow: 2px 2px #222;
+  box-shadow: inset -2px -2px 0px #2a2a2a, inset 2px 2px 0px #c0c0c0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: filter 0.1s;
+}
+
+.mc-btn:hover {
+  background: #8e8e8e;
+  color: #ffffa0;
+  border-color: #bfbfbf #4a4a4a #4a4a4a #bfbfbf;
+}
+
+.mc-btn:active {
+  background: #555555;
+  border-color: #333333 #999999 #999999 #333333;
+  box-shadow: inset 2px 2px 0px #222;
+}
+
+.mc-btn:disabled {
+  background: #444444;
+  color: #888888;
+  border-color: #666 #222 #222 #666;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.mc-btn.full-width {
+  width: 100%;
+}
+
+/* Title Screen */
+.title-screen-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.title-panorama-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(2px);
+  z-index: 1;
+}
+
+.title-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+}
+
+.logo-wrapper {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.minecraft-logo-text {
+  font-size: 54px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  color: #d6d6d6;
+  text-shadow: 
+    0 4px #404040, 
+    0 8px #262626,
+    0 12px #0f0f0f,
+    4px 12px 14px rgba(0, 0, 0, 0.8);
+  transform: scaleY(1.1);
+}
+
+.splash-text {
+  position: absolute;
+  bottom: -16px;
+  right: -30px;
+  color: var(--mc-yellow-splash);
+  font-size: 16px;
+  font-weight: 700;
+  text-shadow: 2px 2px #3f3f00;
+  transform: rotate(-20deg);
+  animation: splashPulse 1.2s infinite alternate ease-in-out;
+  white-space: nowrap;
+}
+
+@keyframes splashPulse {
+  0% {
+    transform: rotate(-20deg) scale(0.95);
+  }
+  100% {
+    transform: rotate(-20deg) scale(1.1);
+  }
+}
+
+.title-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 320px;
+}
+
+.title-btn {
+  width: 100%;
+  padding: 12px 0;
+  font-size: 14px;
+}
+
+.title-footer {
+  position: fixed;
+  bottom: 12px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #aaaaaa;
+  text-shadow: 1px 1px #000;
+  pointer-events: none;
+}
+
+/* Modals & Dialogs */
+.screen-modal {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-dialog {
+  background: #2b2b2b;
+  border: 4px solid #1a1a1a;
+  box-shadow: inset 2px 2px 0 #555, inset -2px -2px 0 #111, 0 8px 32px rgba(0,0,0,0.8);
+  padding: 24px;
+  width: 440px;
+  max-width: 90vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.menu-title {
+  font-size: 18px;
+  color: #fff;
+  text-shadow: 2px 2px #000;
+  margin-bottom: 8px;
+}
+
+.menu-button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+/* Options dialog */
+.options-dialog {
+  max-width: 680px;
+  width: 92%;
+  max-height: 86vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Category Navigation Tabs */
+.options-tabs {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+  margin-bottom: 12px;
+  border-bottom: 2px solid #3c3c3c;
+  padding-bottom: 6px;
+}
+
+.mc-tab-btn {
+  flex: 1;
+  background: #333333;
+  color: #aaaaaa;
+  border: 2px solid;
+  border-color: #555555 #222222 #222222 #555555;
+  padding: 8px 4px;
+  font-size: 11px;
+  cursor: pointer;
+  text-align: center;
+  font-family: inherit;
+  transition: all 0.12s ease;
+}
+
+.mc-tab-btn:hover {
+  background: #444444;
+  color: #ffffff;
+}
+
+.mc-tab-btn.active {
+  background: #555555;
+  color: #ffff55;
+  border-color: #888888 #222222 #222222 #888888;
+  font-weight: bold;
+  text-shadow: 1px 1px #000;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.4);
+}
+
+.tab-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tab-pane.hidden {
+  display: none !important;
+}
+
+.options-sections-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: 6px;
+  margin-bottom: 12px;
+}
+
+.options-category-title {
+  font-size: 12px;
+  color: #ffff55;
+  text-shadow: 1px 1px #000;
+  margin: 10px 0 6px 0;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #444;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+.options-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 100%;
+}
+
+@media (max-width: 600px) {
+  .options-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.option-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  justify-content: center;
+}
+
+.option-row .mc-btn {
+  width: 100%;
+  font-size: 11px;
+  padding: 8px 6px;
+  text-align: center;
+}
+
+.option-row label {
+  font-size: 11px;
+  color: #ccc;
+  text-shadow: 1px 1px #000;
+  display: flex;
+  justify-content: space-between;
+}
+
+.mc-select {
+  width: 100%;
+  background: #1e1e1e;
+  color: #fff;
+  border: 2px solid;
+  border-color: #555 #222 #222 #555;
+  padding: 7px 8px;
+  font-family: inherit;
+  font-size: 11px;
+  outline: none;
+  cursor: pointer;
+}
+
+.mc-select:focus {
+  border-color: #fff;
+}
+
+.mc-slider {
+  width: 100%;
+  accent-color: #55ff55;
+  cursor: pointer;
+}
+
+.res-badge {
+  background: #194419;
+  color: #7fff00;
+  padding: 2px 6px;
+  font-size: 10px;
+  border: 1px solid #7fff00;
+  border-radius: 3px;
+  margin-left: 6px;
+  letter-spacing: 0.5px;
+  display: inline-block;
+  text-shadow: 0 0 4px rgba(127, 255, 0, 0.4);
+}
+
+.mc-input {
+  width: 100%;
+  background: #111;
+  border: 2px solid #555;
+  color: #fff;
+  padding: 8px 10px;
+  font-size: 12px;
+  outline: none;
+}
+
+.mc-input:focus {
+  border-color: #fff;
+}
+
+/* Controls list */
+.controls-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-height: 50vh;
+  overflow-y: auto;
+  font-size: 11px;
+}
+
+.control-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 8px;
+  background: #1e1e1e;
+  border-bottom: 1px solid #333;
+}
+
+.control-item span:first-child {
+  color: #ffff55;
+  font-weight: bold;
+}
+
+.control-item span:last-child {
+  color: #ddd;
+}
+
+/* World Select */
+.world-list {
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: #191919;
+  padding: 8px;
+  border: 2px solid #444;
+}
+
+.world-item {
+  padding: 8px 10px;
+  background: #252525;
+  border: 1px solid #3d3d3d;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.world-item:hover {
+  background: #383838;
+}
+
+.world-item.selected {
+  background: #4a4a4a;
+  border-color: #ffffff;
+}
+
+.world-select-actions, .create-world-actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.world-select-actions .mc-btn, .create-world-actions .mc-btn {
+  flex: 1;
+}
+
+.create-world-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+}
+
+.form-hint {
+  font-size: 10px;
+  color: #888;
+  margin-top: 4px;
+}
+
+/* Inventory Window GUI */
+.minecraft-window {
+  background: var(--mc-window-bg);
+  border: 4px solid;
+  border-color: var(--mc-window-border-light) var(--mc-window-border-dark) var(--mc-window-border-dark) var(--mc-window-border-light);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.85);
+  padding: 16px;
+  color: #3f3f3f;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+}
+
+.window-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #3f3f3f;
+}
+
+.crafting-section {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 0;
+}
+
+.player-avatar-box {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-right: 18px;
+}
+
+.player-avatar-preview {
+  width: 56px;
+  height: 156px;
+  background: #080808;
+  border: 2px solid;
+  border-color: #373737 #ffffff #ffffff #373737;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.crafting-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.crafting-grid {
+  display: grid;
+  gap: 4px;
+  background: #8b8b8b;
+  padding: 4px;
+  border: 2px solid;
+  border-color: #373737 #ffffff #ffffff #373737;
+}
+
+.grid-2x2 {
+  grid-template-columns: repeat(2, 36px);
+  grid-template-rows: repeat(2, 36px);
+}
+
+.grid-3x3 {
+  grid-template-columns: repeat(3, 36px);
+  grid-template-rows: repeat(3, 36px);
+}
+
+.craft-arrow {
+  font-size: 24px;
+  font-weight: bold;
+  color: #373737;
+}
+
+.craft-output-slot {
+  width: 44px;
+  height: 44px;
+}
+
+.slots-grid {
+  display: grid;
+  grid-template-columns: repeat(9, 36px);
+  gap: 4px;
+  background: #8b8b8b;
+  padding: 4px;
+  border: 2px solid;
+  border-color: #373737 #ffffff #ffffff #373737;
+}
+
+.slot {
+  width: 36px;
+  height: 36px;
+  background: #8b8b8b;
+  border: 2px solid;
+  border-color: #373737 #ffffff #ffffff #373737;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+}
+
+.slot:hover {
+  background: #a0a0a0;
+}
+
+.inventory-title {
+  font-size: 11px;
+  color: #3f3f3f;
+  margin-top: 4px;
+}
+
+/* Floating Dragged Item */
+.dragged-item {
+  position: fixed;
+  pointer-events: none;
+  z-index: 1000;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translate(-50%, -50%);
+}
+
+/* F3 Debug Screen */
+#debug-screen {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+  z-index: 20;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #ffffff;
+  text-shadow: 1px 1px #000, -1px -1px #000, 1px -1px #000, -1px 1px #000;
+}
+
+.debug-left, .debug-right {
+  background: rgba(0, 0, 0, 0.4);
+  padding: 8px 12px;
+  border-radius: 4px;
+}
+
+/* Chat Screen */
+#chat-container {
+  position: absolute;
+  bottom: 80px;
+  left: 16px;
+  width: 480px;
+  max-width: calc(100% - 32px);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+#chat-messages {
+  max-height: 160px;
+  overflow-y: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  text-shadow: 1px 1px #000;
+}
+
+.chat-msg {
+  background: rgba(0, 0, 0, 0.45);
+  padding: 3px 6px;
+  border-radius: 2px;
+}
+
+.chat-msg.system {
+  color: #ffff55;
+}
+
+#chat-input-row {
+  display: flex;
+}
+
+#chat-input {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid #777;
+  color: #fff;
+  padding: 6px 10px;
+  font-size: 12px;
+  outline: none;
+}
+
+/* Loading Screen */
+#loading-screen {
+  background: #141414;
+  z-index: 200;
+}
+
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.loading-logo {
+  font-size: 40px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  color: #d6d6d6;
+  text-shadow: 0 4px #333;
+}
+
+.loading-bar-border {
+  width: 320px;
+  height: 18px;
+  background: #222;
+  border: 2px solid #555;
+  box-shadow: inset 1px 1px 0 #111;
+  padding: 2px;
+}
+
+#loading-bar-fill {
+  width: 0%;
+  height: 100%;
+  background: #55ff55;
+  transition: width 0.15s ease-out;
+}
+
+#loading-status {
+  font-size: 12px;
+  color: #aaa;
+  text-shadow: 1px 1px #000;
+}
+
+/* Villager Trading GUI Styles */
+.trading-window {
+  width: 480px;
+  max-width: 95vw;
+}
+
+.trading-status-bar {
+  font-size: 12px;
+  color: #222;
+  background: #a0a0a0;
+  padding: 6px 10px;
+  border: 2px solid;
+  border-color: #373737 #ffffff #ffffff #373737;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.trading-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 4px 2px;
+}
+
+.trade-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #8b8b8b;
+  border: 2px solid;
+  border-color: #373737 #ffffff #ffffff #373737;
+  padding: 6px 10px;
+  gap: 8px;
+}
+
+.trade-item-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 110px;
+}
+
+.trade-item-label {
+  font-size: 11px;
+  color: #ffffff;
+  text-shadow: 1px 1px #000;
+}
+
+.trade-arrow {
+  font-size: 16px;
+  font-weight: bold;
+  color: #3f3f3f;
+}
+
+.trade-btn {
+  padding: 6px 14px;
+  font-size: 11px;
+}
+
+.trade-btn-active {
+  background: #2e8b2e;
+  border-color: #55ff55 #144d14 #144d14 #55ff55;
+  color: #ffffff;
+  box-shadow: inset -2px -2px 0px #144d14, inset 2px 2px 0px #66ff66;
+}
+
+.trade-btn-active:hover {
+  background: #39a839;
+  color: #ffffaa;
+}
+
+/* Utility Helpers */
+.hidden {
+  display: none !important;
+}
+
+/* Furnace GUI Styles */
+.furnace-window {
+  width: 380px;
+}
+
+.furnace-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 16px 0;
+}
+
+.furnace-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.furnace-flame-container {
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.furnace-flame {
+  font-size: 16px;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.furnace-arrow-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.furnace-arrow {
+  font-size: 26px;
+  font-weight: bold;
+  color: #373737;
+}
+
+.furnace-progress-bar {
+  width: 32px;
+  height: 8px;
+  background: #555;
+  border: 1px solid #222;
+  overflow: hidden;
+}
+
+.furnace-progress-fill {
+  width: 0%;
+  height: 100%;
+  background: #55ff55;
+  transition: width 0.1s linear;
+}
+
+.furnace-output-slot {
+  width: 48px;
+  height: 48px;
+}
+
+/* Chest GUI Styles */
+.chest-window {
+  width: 380px;
+}
+
+.chest-grid {
+  grid-template-rows: repeat(3, 36px);
+  margin-bottom: 8px;
+}
+
+/* Floating Camera Toast Notification */
+#camera-toast {
+  position: fixed;
+  top: 14%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(16, 16, 16, 0.85);
+  color: #ffffff;
+  padding: 8px 18px;
+  border-radius: 4px;
+  border: 2px solid #555555;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  text-shadow: 1px 1px #000;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+/* Enchanted Item Shimmering Glint */
+.enchanted-slot {
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 0 10px rgba(180, 70, 255, 0.5), 0 0 8px rgba(180, 70, 255, 0.4);
+}
+
+.enchanted-slot::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 35%,
+    rgba(220, 120, 255, 0.45) 50%,
+    transparent 65%
+  );
+  animation: enchantedShine 2.5s infinite linear;
+  pointer-events: none;
+}
+
+@keyframes enchantedShine {
+  0% { transform: translateY(-70%) rotate(25deg); }
+  100% { transform: translateY(70%) rotate(25deg); }
+}
+
+/* ========================================================
+   AUTHENTIC DEATH SCREEN MODAL
+   ======================================================== */
+#death-screen {
+  background: radial-gradient(circle at center, rgba(120, 0, 0, 0.72) 0%, rgba(35, 0, 0, 0.92) 100%) !important;
+  backdrop-filter: blur(3px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#death-screen.hidden {
+  display: none !important;
+}
+
+.death-dialog {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: deathFadeIn 0.8s ease-out;
+}
+
+@keyframes deathFadeIn {
+  0% { opacity: 0; transform: scale(0.92); }
+  100% { opacity: 1; transform: scale(1.0); }
+}
+
+.death-title {
+  font-size: 38px;
+  color: #ff3333;
+  text-shadow: 3px 3px 0 #000000, 0 0 25px rgba(255, 30, 30, 0.85);
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+}
+
+.death-score {
+  font-size: 15px;
+  color: #ffffff;
+  text-shadow: 2px 2px 0 #000;
+  margin-bottom: 32px;
+  letter-spacing: 1px;
+}
+
+.death-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 260px;
+}
+
+.death-btn {
+  width: 100%;
+  height: 44px;
+  font-size: 14px;
+}
+
+/* ========================================================
+   ADVANCEMENT / ACHIEVEMENT TOAST NOTIFICATIONS
+   ======================================================== */
+#advancement-toast-container {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 10000;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.advancement-toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #212121;
+  border: 2px solid #666666;
+  outline: 2px solid #000000;
+  border-radius: 4px;
+  padding: 10px 16px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.85);
+  transform: translateX(120%);
+  opacity: 0;
+  transition: transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2), opacity 0.35s ease;
+  pointer-events: auto;
+  min-width: 260px;
+  max-width: 340px;
+}
+
+.advancement-toast.visible {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.adv-icon {
+  width: 38px;
+  height: 38px;
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #3c3c3c;
+  border-radius: 4px;
+  flex-shrink: 0;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.6);
+}
+
+.adv-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.adv-header {
+  font-size: 10px;
+  color: #ffaa00;
+  text-shadow: 1px 1px 0 #000;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.adv-title {
+  font-size: 13px;
+  color: #ffffff;
+  text-shadow: 1px 1px 0 #000;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.adv-desc {
+  font-size: 10px;
+  color: #aaaaaa;
+  text-shadow: 1px 1px 0 #000;
+  line-height: 1.35;
+}
+
+/* --- Enchanting GUI Styles --- */
+.enchanting-window {
+  width: 440px;
+  background-color: var(--mc-window-bg);
+}
+
+.enchanting-body {
+  display: flex;
+  gap: 16px;
+  padding: 12px;
+  background-color: #8b8b8b;
+  border: 2px solid #373737;
+  margin-bottom: 12px;
+}
+
+.enchanting-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100px;
+}
+
+.enchant-slot {
+  width: 48px;
+  height: 48px;
+  background-color: #555555;
+  border: 3px solid #333333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.enchant-lapis-slot {
+  font-size: 20px;
+  filter: drop-shadow(0 0 4px #00a8ff);
+}
+
+.enchant-xp-badge {
+  font-size: 9px;
+  color: #55ff55;
+  text-shadow: 1px 1px 0 #000;
+  text-align: center;
+}
+
+.enchanting-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.enchant-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.enchant-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #2b2b2b;
+  border: 2px solid #555555;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.enchant-row:hover:not(.disabled) {
+  background: #3e3e3e;
+  border-color: #ffff55;
+  transform: translateX(2px);
+}
+
+.enchant-row.disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.enchant-cost {
+  width: 24px;
+  height: 24px;
+  background: #1b5e20;
+  color: #a5d6a7;
+  font-size: 11px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  border: 1px solid #81c784;
+}
+
+.enchant-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.enchant-runes {
+  font-size: 8px;
+  color: #bb86fc;
+  letter-spacing: 1px;
+  opacity: 0.85;
+}
+
+.enchant-name {
+  font-size: 9px;
+  color: #ffff55;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.enchant-empty-msg {
+  font-size: 9px;
+  color: #eeeeee;
+  text-align: center;
+  padding: 16px 8px;
+}
+
+.enchanted-text {
+  color: #ff55ff;
+  font-weight: bold;
+}
+
+.enchanted-glow {
+  box-shadow: 0 0 10px #ff55ff, inset 0 0 8px #bb86fc;
+  border-color: #ff55ff !important;
+}
+
+/* --- Floating Custom Minecraft Tooltip --- */
+.mc-tooltip {
+  position: fixed;
+  z-index: 10000;
+  pointer-events: none;
+  background: rgba(16, 0, 16, 0.94);
+  border: 2px solid #280048;
+  border-radius: 2px;
+  padding: 6px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8);
+  max-width: 240px;
+}
+
+.tooltip-title {
+  font-size: 11px;
+  font-weight: bold;
+  color: #ffffff;
+  text-shadow: 1px 1px 0 #3f3f3f;
+}
+
+.tooltip-stat {
+  font-size: 9px;
+  color: #55ff55;
+  text-shadow: 1px 1px 0 #003300;
+}
+
+.tooltip-enchant {
+  font-size: 9px;
+  color: #bb86fc;
+  text-shadow: 1px 1px 0 #280048;
+}
+
+.tooltip-durability {
+  font-size: 9px;
+  color: #ffaa00;
+  text-shadow: 1px 1px 0 #442200;
+}
+
+/* --- Touch Screen Controls & Movement Overlay --- */
+.touch-movement-overlay {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  right: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  pointer-events: none;
+  z-index: 50;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+.touch-dpad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: auto;
+  gap: 4px;
+}
+
+.touch-dpad-middle {
+  display: flex;
+  gap: 4px;
+}
+
+.touch-dpad-btn {
+  width: 54px;
+  height: 54px;
+  background: rgba(18, 18, 18, 0.55);
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  transition: background 0.1s, transform 0.08s;
+}
+
+.touch-dpad-btn:active, .touch-dpad-btn.pressed {
+  background: rgba(255, 255, 255, 0.4);
+  border-color: #ffffff;
+  transform: scale(0.94);
+}
+
+.touch-actions-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+.touch-action-btn {
+  width: 76px;
+  height: 60px;
+  background: rgba(18, 18, 18, 0.55);
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  border-radius: 8px;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  transition: background 0.1s, transform 0.08s;
+}
+
+.touch-action-btn:active, .touch-action-btn.pressed {
+  background: rgba(255, 255, 255, 0.4);
+  border-color: #ffffff;
+  transform: scale(0.94);
+}
+
+/* Touch Corner Action Buttons (Pause & Perspective) */
+.touch-corner-actions {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  display: none;
+  gap: 8px;
+  z-index: 35;
+  pointer-events: auto;
+}
+
+body.has-touch .touch-corner-actions {
+  display: flex;
+}
+
+.touch-corner-btn {
+  width: 42px;
+  height: 42px;
+  background: rgba(18, 18, 18, 0.6);
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-radius: 6px;
+  color: #ffffff;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.touch-corner-btn:active {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: #ffffff;
+}
+
+
+

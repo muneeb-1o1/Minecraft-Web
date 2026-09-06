@@ -1,0 +1,21 @@
+{
+  "name": "minecraft-replica",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "tsx --test test/minecraft.test.ts"
+  },
+  "dependencies": {
+    "three": "^0.160.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.160.0",
+    "tsx": "^4.23.13",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.12"
+  }
+}

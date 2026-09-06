@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Minecraft Web Edition</title>
+  <meta name="description" content="A feature-complete 3D voxel sandbox game built with WebGL and modern web technologies.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/styles/main.css">
+</head>
+<body>
+  <!-- 3D Canvas Container -->
+  <div id="game-container">
+    <canvas id="webgl-canvas"></canvas>
+  </div>
+
+  <!-- In-Game HUD -->
+  <div id="hud" class="hidden">
+    <!-- Crosshair -->
+    <div id="crosshair"></div>
+
+    <!-- Held item label (fades out) -->
+    <div id="item-label" class="item-label"></div>
+
+    <!-- Status Bars: Health, Armor, Hunger, Air -->
+    <div id="status-bars">
+      <div class="bars-left">
+        <div id="armor-bar" class="stat-bar hidden"></div>
+        <div id="health-bar" class="stat-bar"></div>
+        <div id="air-bar" class="stat-bar hidden"></div>
+      </div>
+      <div class="bars-right">
+        <div id="hunger-bar" class="stat-bar"></div>
+      </div>
+    </div>
+
+    <!-- Experience Bar -->
+    <div id="exp-container">
+      <div id="exp-bar-fill"></div>
+      <div id="exp-level">0</div>
+    </div>
+
+    <!-- Hotbar -->
+    <div id="hotbar-container">
+      <div id="hotbar" class="minecraft-bar">
+        <!-- 9 hotbar slots -->
+        <div class="hotbar-slot active" data-slot="0"></div>
+        <div class="hotbar-slot" data-slot="1"></div>
+        <div class="hotbar-slot" data-slot="2"></div>
+        <div class="hotbar-slot" data-slot="3"></div>
+        <div class="hotbar-slot" data-slot="4"></div>
+        <div class="hotbar-slot" data-slot="5"></div>
+        <div class="hotbar-slot" data-slot="6"></div>
+        <div class="hotbar-slot" data-slot="7"></div>
+        <div class="hotbar-slot" data-slot="8"></div>
+      </div>
+    </div>
+
+    <!-- Underwater / Hurt screen tint overlays -->
+    <div id="hurt-overlay" class="screen-overlay"></div>
+    <div id="water-overlay" class="screen-overlay hidden"></div>
+    <div id="vignette-overlay" class="screen-overlay"></div>
+  </div>
+
+  <!-- F3 Debug Screen -->
+  <div id="debug-screen" class="hidden">
+    <div class="debug-left" id="debug-info-left"></div>
+    <div class="debug-right" id="debug-info-right"></div>
+  </div>
+
+  <!-- Chat / Commands Bar -->
+  <div id="chat-container" class="hidden">
+    <div id="chat-messages"></div>
+    <div id="chat-input-row">
+      <input type="text" id="chat-input" placeholder="Press Enter to send or / for commands..." autocomplete="off" />
+    </div>
+  </div>
+
+  <!-- Death Screen (You Died!) -->
+  <div id="death-screen" class="screen-modal hidden">
+    <div class="death-dialog">
+      <h1 class="death-title">You Died!</h1>
+      <div class="death-score" id="death-score">Score: 0</div>
+      <div class="death-actions">
+        <button class="mc-btn death-btn" id="respawn-btn">Respawn</button>
+        <button class="mc-btn death-btn" id="death-title-btn">Title Screen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Inventory & Crafting Screen (E) -->
+  <div id="inventory-screen" class="screen-modal hidden">
+    <div class="minecraft-window" id="inventory-window">
+      <div class="window-header">
+        <span>Crafting</span>
+        <button class="close-btn" id="inventory-close-btn">&times;</button>
+      </div>
+      
+      <!-- Player preview & 2x2 crafting or 3x3 table crafting -->
+      <div class="crafting-section" id="crafting-2x2-section">
+        <div class="player-avatar-box">
+          <div class="armor-slots-column">
+            <div class="slot armor-slot" data-armor-slot="0" title="Helmet"></div>
+            <div class="slot armor-slot" data-armor-slot="1" title="Chestplate"></div>
+            <div class="slot armor-slot" data-armor-slot="2" title="Leggings"></div>
+            <div class="slot armor-slot" data-armor-slot="3" title="Boots"></div>
+          </div>
+          <div class="player-avatar-preview" id="player-avatar-preview">
+            <svg viewBox="0 0 32 64" width="44" height="96" style="image-rendering: pixelated; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));">
+              <!-- Head -->
+              <rect x="8" y="4" width="16" height="16" fill="#c68642" />
+              <!-- Hair -->
+              <rect x="8" y="4" width="16" height="4" fill="#4a2c11" />
+              <rect x="8" y="8" width="3" height="4" fill="#4a2c11" />
+              <rect x="21" y="8" width="3" height="4" fill="#4a2c11" />
+              <!-- Eyes -->
+              <rect x="10" y="10" width="3" height="2" fill="#ffffff" />
+              <rect x="11" y="10" width="2" height="2" fill="#2b43a0" />
+              <rect x="19" y="10" width="3" height="2" fill="#ffffff" />
+              <rect x="19" y="10" width="2" height="2" fill="#2b43a0" />
+              <!-- Nose & Mouth -->
+              <rect x="14" y="13" width="4" height="2" fill="#9c5f2b" />
+              <rect x="13" y="16" width="6" height="1" fill="#60371a" />
+              <!-- Torso / Cyan Shirt -->
+              <rect x="8" y="20" width="16" height="22" fill="#00a299" />
+              <!-- Left Arm -->
+              <rect x="3" y="20" width="5" height="22" fill="#00a299" />
+              <rect x="3" y="36" width="5" height="6" fill="#c68642" />
+              <!-- Right Arm -->
+              <rect x="24" y="20" width="5" height="22" fill="#00a299" />
+              <rect x="24" y="36" width="5" height="6" fill="#c68642" />
+              <!-- Dark Blue Pants / Legs -->
+              <rect x="8" y="42" width="7.5" height="20" fill="#2b3b84" />
+              <rect x="16.5" y="42" width="7.5" height="20" fill="#243270" />
+              <!-- Shoes -->
+              <rect x="8" y="58" width="7.5" height="4" fill="#505050" />
+              <rect x="16.5" y="58" width="7.5" height="4" fill="#404040" />
+            </svg>
+          </div>
+        </div>
+        <div class="crafting-area">
+          <div class="crafting-grid grid-2x2" id="craft-grid-2x2">
+            <div class="slot craft-slot" data-craft-slot="0"></div>
+            <div class="slot craft-slot" data-craft-slot="1"></div>
+            <div class="slot craft-slot" data-craft-slot="2"></div>
+            <div class="slot craft-slot" data-craft-slot="3"></div>
+          </div>
+          <div class="craft-arrow">&rarr;</div>
+          <div class="slot craft-output-slot" id="craft-output-2x2"></div>
+        </div>
+      </div>
+
+      <!-- 3x3 Crafting Table Modal -->
+      <div class="crafting-section hidden" id="crafting-3x3-section">
+        <div class="crafting-area">
+          <div class="crafting-grid grid-3x3" id="craft-grid-3x3">
+            <div class="slot craft-slot" data-craft-slot="0"></div>
+            <div class="slot craft-slot" data-craft-slot="1"></div>
+            <div class="slot craft-slot" data-craft-slot="2"></div>
+            <div class="slot craft-slot" data-craft-slot="3"></div>
+            <div class="slot craft-slot" data-craft-slot="4"></div>
+            <div class="slot craft-slot" data-craft-slot="5"></div>
+            <div class="slot craft-slot" data-craft-slot="6"></div>
+            <div class="slot craft-slot" data-craft-slot="7"></div>
+            <div class="slot craft-slot" data-craft-slot="8"></div>
+          </div>
+          <div class="craft-arrow">&rarr;</div>
+          <div class="slot craft-output-slot" id="craft-output-3x3"></div>
+        </div>
+      </div>
+
+      <!-- Main 27 Inventory Slots (3 rows of 9) -->
+      <div class="inventory-title">Inventory</div>
+      <div class="slots-grid main-inventory" id="main-inventory-slots">
+        <!-- 27 slots generated dynamically -->
+      </div>
+
+      <!-- 9 Hotbar Slots in Inventory -->
+      <div class="slots-grid hotbar-inventory" id="hotbar-inventory-slots">
+        <!-- 9 slots generated dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Villager Trading Screen -->
+  <div id="trading-screen" class="screen-modal hidden">
+    <div class="minecraft-window trading-window">
+      <div class="window-header">
+        <span>Villager Trading</span>
+        <button class="close-btn" id="trading-close-btn">&times;</button>
+      </div>
+      <div id="trading-emerald-count" class="trading-status-bar">
+        Your Emeralds: <strong>0</strong> | Wheat: <strong>0</strong>
+      </div>
+      <div id="trading-list" class="trading-list">
+        <!-- Trade rows generated dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Furnace Smelting Screen -->
+  <div id="furnace-screen" class="screen-modal hidden">
+    <div class="minecraft-window furnace-window">
+      <div class="window-header">
+        <span>Furnace</span>
+        <button class="close-btn" id="furnace-close-btn">&times;</button>
+      </div>
+      <div class="furnace-body">
+        <div class="furnace-left">
+          <div class="slot furnace-slot" id="furnace-input-slot" title="Input Ore / Food"></div>
+          <div class="furnace-flame-container">
+            <div class="furnace-flame" id="furnace-flame-icon">🔥</div>
+          </div>
+          <div class="slot furnace-slot" id="furnace-fuel-slot" title="Fuel (Coal / Planks / Sticks)"></div>
+        </div>
+        <div class="furnace-arrow-container">
+          <div class="furnace-arrow">&rarr;</div>
+          <div class="furnace-progress-bar">
+            <div class="furnace-progress-fill" id="furnace-cook-progress"></div>
+          </div>
+        </div>
+        <div class="furnace-right">
+          <div class="slot furnace-output-slot" id="furnace-output-slot" title="Smelted Output"></div>
+        </div>
+      </div>
+      <div class="inventory-title">Inventory</div>
+      <div class="slots-grid main-inventory" id="furnace-player-slots"></div>
+      <div class="slots-grid hotbar-inventory" id="furnace-hotbar-slots"></div>
+    </div>
+  </div>
+
+  <!-- Chest Storage Screen -->
+  <div id="chest-screen" class="screen-modal hidden">
+    <div class="minecraft-window chest-window">
+      <div class="window-header">
+        <span>Chest</span>
+        <button class="close-btn" id="chest-close-btn">&times;</button>
+      </div>
+      <div class="slots-grid chest-grid" id="chest-storage-slots"></div>
+      <div class="inventory-title">Inventory</div>
+      <div class="slots-grid main-inventory" id="chest-player-slots"></div>
+      <div class="slots-grid hotbar-inventory" id="chest-hotbar-slots"></div>
+    </div>
+  </div>
+
+  <!-- Enchanting Table Screen -->
+  <div id="enchanting-screen" class="screen-modal hidden">
+    <div class="minecraft-window enchanting-window">
+      <div class="window-header">
+        <span>Enchant</span>
+        <button class="close-btn" id="enchanting-close-btn">&times;</button>
+      </div>
+      <div class="enchanting-body">
+        <div class="enchanting-left">
+          <div class="slot enchant-slot" id="enchant-item-slot" title="Tool, Weapon, or Armor"></div>
+          <div class="enchant-lapis-slot" title="Arcane Lapis Catalyst">💎</div>
+          <div id="enchant-xp-badge" class="enchant-xp-badge">Your Level: 0</div>
+        </div>
+        <div class="enchanting-right">
+          <div class="enchant-options-list" id="enchant-options-list">
+            <!-- 3 tiered options populated dynamically -->
+          </div>
+        </div>
+      </div>
+      <div class="inventory-title">Inventory</div>
+      <div class="slots-grid main-inventory" id="enchant-player-slots"></div>
+      <div class="slots-grid hotbar-inventory" id="enchant-hotbar-slots"></div>
+    </div>
+  </div>
+
+  <!-- Floating Custom Minecraft Item Tooltip -->
+  <div id="mc-tooltip" class="mc-tooltip hidden">
+    <div class="tooltip-title" id="tooltip-title">Item Name</div>
+    <div class="tooltip-stat" id="tooltip-stat"></div>
+    <div class="tooltip-enchant" id="tooltip-enchant"></div>
+    <div class="tooltip-durability" id="tooltip-durability"></div>
+  </div>
+
+  <!-- Touch Corner Actions (Pause, Perspective, Inventory) -->
+  <div class="touch-corner-actions" id="touch-corner-actions">
+    <button class="touch-corner-btn" id="touch-btn-pause" title="Pause Game">⏸</button>
+    <button class="touch-corner-btn" id="touch-btn-view" title="Change Perspective (C)">📷</button>
+    <button class="touch-corner-btn" id="touch-btn-inv" title="Inventory (E)">🎒</button>
+  </div>
+
+  <!-- Virtual Touch Movement D-Pad & Jump (Toggled in Touch Settings) -->
+  <div id="touch-movement-overlay" class="touch-movement-overlay hidden">
+    <div class="touch-dpad">
+      <button class="touch-dpad-btn" id="touch-btn-up">▲</button>
+      <div class="touch-dpad-middle">
+        <button class="touch-dpad-btn" id="touch-btn-left">◀</button>
+        <button class="touch-dpad-btn" id="touch-btn-down">▼</button>
+        <button class="touch-dpad-btn" id="touch-btn-right">▶</button>
+      </div>
+    </div>
+    <div class="touch-actions-group">
+      <button class="touch-action-btn" id="touch-btn-jump">JUMP</button>
+    </div>
+  </div>
+
+  <!-- Floating Dragged Item Preview -->
+  <div id="dragged-item" class="dragged-item hidden"></div>
+
+  <!-- Pause Menu (ESC) -->
+  <div id="pause-menu" class="screen-modal hidden">
+    <div class="menu-dialog">
+      <h2 class="menu-title">Game Paused</h2>
+      <div class="menu-button-group">
+        <button class="mc-btn" id="resume-game-btn">Back to Game</button>
+        <button class="mc-btn" id="options-btn">Options...</button>
+        <button class="mc-btn" id="controls-btn">Controls...</button>
+        <button class="mc-btn" id="switch-gamemode-btn">Gamemode: Survival</button>
+        <button class="mc-btn" id="save-quit-btn">Save and Quit to Title</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Options & Video Settings Modal -->
+  <div id="options-screen" class="screen-modal hidden">
+    <div class="menu-dialog options-dialog">
+      <h2 class="menu-title">Game Options & Settings</h2>
+
+      <!-- Navigation Tabs -->
+      <div class="options-tabs">
+        <button class="mc-tab-btn active" id="tab-btn-graphics" data-tab="tab-graphics">Video & Graphics</button>
+        <button class="mc-tab-btn" id="tab-btn-audio" data-tab="tab-audio">Audio & World</button>
+        <button class="mc-tab-btn" id="tab-btn-touch" data-tab="tab-touch">Touch & Controls</button>
+      </div>
+      
+      <div class="options-sections-container">
+        <!-- Tab 1: Video & Graphics -->
+        <div id="tab-graphics" class="tab-pane">
+          <div class="options-category-title">Display & Resolution</div>
+          <div class="options-grid">
+            <div class="option-row">
+              <label for="resolution-select">Resolution: <span id="active-res-badge" class="res-badge">1080p</span></label>
+              <select id="resolution-select" class="mc-select">
+                <option value="1080p" selected>1920x1080 (1080p Full HD)</option>
+                <option value="900p">1600x900 (900p HD+)</option>
+                <option value="720p">1280x720 (720p HD)</option>
+                <option value="540p">960x540 (540p qHD)</option>
+                <option value="480p">854x480 (480p Performance)</option>
+                <option value="360p">640x360 (360p Retro Performance)</option>
+                <option value="native">Native (Match Window)</option>
+              </select>
+            </div>
+            <div class="option-row">
+              <label>Render Scale: <span id="render-scale-val">100%</span></label>
+              <input type="range" id="render-scale-slider" min="50" max="100" step="10" value="100" class="mc-slider">
+            </div>
+            <div class="option-row">
+              <label>Field of View (FOV): <span id="fov-val">75</span></label>
+              <input type="range" id="fov-slider" min="50" max="110" value="75" class="mc-slider">
+            </div>
+            <div class="option-row">
+              <label>Render Distance: <span id="render-dist-val">6</span> chunks</label>
+              <input type="range" id="render-dist-slider" min="3" max="12" value="6" class="mc-slider">
+            </div>
+            <div class="option-row">
+              <label for="fps-limit-select">Max Framerate:</label>
+              <select id="fps-limit-select" class="mc-select">
+                <option value="0" selected>Unlimited (VSync)</option>
+                <option value="144">144 FPS</option>
+                <option value="120">120 FPS</option>
+                <option value="60">60 FPS</option>
+                <option value="30">30 FPS (Power Saver)</option>
+              </select>
+            </div>
+            <div class="option-row">
+              <button class="mc-btn" id="toggle-fullscreen-btn">Fullscreen: OFF</button>
+            </div>
+            <div class="option-row">
+              <button class="mc-btn" id="toggle-fps-btn">Show FPS: ON</button>
+            </div>
+          </div>
+
+          <div class="options-category-title" style="margin-top: 14px;">Graphics & Visuals</div>
+          <div class="options-grid">
+            <div class="option-row">
+              <button class="mc-btn" id="graphics-preset-btn">Graphics: RTX Ultra</button>
+            </div>
+            <div class="option-row">
+              <label>Brightness: <span id="exposure-val">100%</span></label>
+              <input type="range" id="exposure-slider" min="50" max="150" value="100" class="mc-slider">
+            </div>
+            <div class="option-row">
+              <button class="mc-btn" id="toggle-ao-btn">Smooth Lighting: ON</button>
+            </div>
+            <div class="option-row">
+              <button class="mc-btn" id="cloud-quality-btn">Clouds: Fancy 3D Volumetric</button>
+            </div>
+            <div class="option-row">
+              <button class="mc-btn" id="shadow-quality-btn">RTX Shadows: PCF Soft (2048)</button>
+            </div>
+            <div class="option-row">
+              <button class="mc-btn" id="toggle-bloom-btn">RTX Bloom: ON</button>
+            </div>
+            <div class="option-row">
+              <button class="mc-btn" id="toggle-godrays-btn">RTX God Rays: ON</button>
+            </div>
+            <div class="option-row">
+              <button class="mc-btn" id="toggle-water-refl-btn">Water Shimmer: ON</button>
+            </div>
+            <div class="option-row">
+              <button class="mc-btn" id="toggle-fog-btn">Fog: Fancy (ON)</button>
+            </div>
+            <!-- Retained hidden for backward compatibility -->
+            <div class="option-row" style="display: none;">
+              <button class="mc-btn" id="tone-mapping-btn">Tone Mapping: ACES Filmic</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: Audio & Atmosphere -->
+        <div id="tab-audio" class="tab-pane hidden">
+          <div class="options-category-title">Sound & Audio</div>
+          <div class="options-grid">
+            <div class="option-row">
+              <label>Master Volume: <span id="volume-val">80%</span></label>
+              <input type="range" id="volume-slider" min="0" max="100" value="80" class="mc-slider">
+            </div>
+            <div class="option-row">
+              <label>Music Volume: <span id="music-volume-val">40%</span></label>
+              <input type="range" id="music-volume-slider" min="0" max="100" value="40" class="mc-slider">
+            </div>
+            <div class="option-row">
+              <label>Sound FX: <span id="sfx-volume-val">100%</span></label>
+              <input type="range" id="sfx-volume-slider" min="0" max="100" value="100" class="mc-slider">
+            </div>
+            <div class="option-row">
+              <label>Weather & Ambience: <span id="weather-volume-val">80%</span></label>
+              <input type="range" id="weather-volume-slider" min="0" max="100" value="80" class="mc-slider">
+            </div>
+          </div>
+
+          <div class="options-category-title" style="margin-top: 14px;">World Timing & Atmosphere</div>
+          <div class="options-grid">
+            <div class="option-row">
+              <button class="mc-btn" id="weather-select-btn">Weather: Clear</button>
+            </div>
+            <div class="option-row">
+              <button class="mc-btn" id="day-length-btn">Day Length: 20 min (Extended)</button>
+            </div>
+            <div class="option-row">
+              <button class="mc-btn" id="fast-nights-btn">Fast Nights: ON (4x Speed)</button>
+            </div>
+            <div class="option-row">
+              <button class="mc-btn" id="reset-options-btn">Reset to Defaults</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 3: Touch & Controls -->
+        <div id="tab-touch" class="tab-pane hidden">
+          <div class="options-category-title">Touch Screen Settings</div>
+          <div class="options-grid">
+            <div class="option-row">
+              <button class="mc-btn" id="touch-controls-btn">Touch Controls: ON</button>
+            </div>
+            <div class="option-row">
+              <label>Touch Sensitivity: <span id="touch-sensitivity-val">100%</span></label>
+              <input type="range" id="touch-sensitivity-slider" min="20" max="300" step="10" value="100" class="mc-slider">
+            </div>
+            <div class="option-row">
+              <button class="mc-btn" id="touch-invert-pitch-btn">Invert Touch Pitch (Y): OFF</button>
+            </div>
+            <div class="option-row">
+              <button class="mc-btn" id="touch-tap-mode-btn">Touch Action: Tap Place / Hold Mine</button>
+            </div>
+            <div class="option-row">
+              <button class="mc-btn" id="touch-pinch-zoom-btn">Pinch to Zoom: ON</button>
+            </div>
+            <div class="option-row">
+              <button class="mc-btn" id="touch-virtual-pad-btn">Touch D-Pad (Move): OFF</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="mc-btn full-width" id="options-done-btn">Done</button>
+    </div>
+  </div>
+
+  <!-- Controls Screen Modal -->
+  <div id="controls-screen" class="screen-modal hidden">
+    <div class="menu-dialog controls-dialog">
+      <h2 class="menu-title">Controls</h2>
+      <div class="controls-list">
+        <div class="control-item"><span>W / A / S / D</span><span>Move Forward / Left / Back / Right</span></div>
+        <div class="control-item"><span>Space</span><span>Jump (Double-tap in Creative: Fly)</span></div>
+        <div class="control-item"><span>Shift</span><span>Sneak / Descend in Fly</span></div>
+        <div class="control-item"><span>Left Click (Hold)</span><span>Mine / Break Block</span></div>
+        <div class="control-item"><span>Right Click</span><span>Place Block / Open Table</span></div>
+        <div class="control-item"><span>1 - 9 / Wheel</span><span>Select Hotbar Slot</span></div>
+        <div class="control-item"><span>E</span><span>Open Inventory / Crafting</span></div>
+        <div class="control-item"><span>Q</span><span>Drop Held Item</span></div>
+        <div class="control-item"><span>F</span><span>Toggle Flight (Creative)</span></div>
+        <div class="control-item"><span>C</span><span>Change Perspective (1st / 3rd / Isometric)</span></div>
+        <div class="control-item"><span>F3</span><span>Toggle Debug Info</span></div>
+        <div class="control-item"><span>ESC</span><span>Pause Menu / Close Window</span></div>
+        <div class="control-item" style="grid-column: 1 / -1; margin-top: 8px; font-weight: bold; color: #ffaa00;"><span>Touch Screen Gestures</span><span></span></div>
+        <div class="control-item"><span>One-Finger Swipe</span><span>Look around / Orbit Camera</span></div>
+        <div class="control-item"><span>Quick Tap (&lt;250ms)</span><span>Place Block / Open Containers</span></div>
+        <div class="control-item"><span>Hold Touch (&gt;250ms)</span><span>Mine / Break Blocks</span></div>
+        <div class="control-item"><span>Two-Finger Pinch</span><span>Zoom Camera (Isometric)</span></div>
+        <div class="control-item"><span>Three-Finger Tap</span><span>Pause Menu</span></div>
+        <div class="control-item"><span>Tap Hotbar Slot</span><span>Select Held Item</span></div>
+      </div>
+      <button class="mc-btn full-width" id="controls-done-btn">Done</button>
+    </div>
+  </div>
+
+  <!-- Main Title Screen -->
+  <div id="title-screen" class="title-screen-container">
+    <div class="title-panorama-overlay"></div>
+    <div class="title-content">
+      <!-- Minecraft Logo & Splash Text -->
+      <div class="logo-wrapper">
+        <div class="minecraft-logo-text">MINECRAFT</div>
+        <div class="splash-text" id="splash-text">100% Pure WebGL!</div>
+      </div>
+
+      <!-- Main Menu Buttons -->
+      <div class="title-buttons">
+        <button class="mc-btn title-btn" id="singleplayer-btn">Singleplayer</button>
+        <button class="mc-btn title-btn" id="title-options-btn">Options...</button>
+        <button class="mc-btn title-btn" id="title-controls-btn">Controls...</button>
+        <button class="mc-btn title-btn" id="instructions-btn">How To Play</button>
+      </div>
+
+      <div class="title-footer">
+        <span>Minecraft Web Edition 1.20</span>
+        <span>Made with Three.js & WebGL</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- World Selection / Creation Screen -->
+  <div id="world-select-screen" class="screen-modal hidden">
+    <div class="menu-dialog world-select-dialog">
+      <h2 class="menu-title">Select World</h2>
+      <div class="world-list" id="world-list">
+        <!-- Worlds populated dynamically -->
+      </div>
+      <div class="world-select-actions">
+        <button class="mc-btn" id="play-selected-world-btn" disabled>Play Selected World</button>
+        <button class="mc-btn" id="create-new-world-btn">Create New World</button>
+        <button class="mc-btn" id="cancel-world-select-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create New World Modal -->
+  <div id="create-world-screen" class="screen-modal hidden">
+    <div class="menu-dialog create-world-dialog">
+      <h2 class="menu-title">Create New World</h2>
+      <div class="create-world-form">
+        <div class="form-row">
+          <label>World Name:</label>
+          <input type="text" id="new-world-name" class="mc-input" value="New World" />
+        </div>
+        <div class="form-row">
+          <label>Seed (Optional):</label>
+          <input type="text" id="new-world-seed" class="mc-input" placeholder="Leave blank for random" />
+        </div>
+        <div class="form-row">
+          <button class="mc-btn" id="gamemode-toggle-btn">Game Mode: Survival</button>
+          <p class="form-hint" id="gamemode-hint">Search for resources, craft, gain levels, health and hunger.</p>
+        </div>
+        <div class="form-row">
+          <button class="mc-btn" id="worldtype-toggle-btn">World Type: Default</button>
+        </div>
+      </div>
+      <div class="create-world-actions">
+        <button class="mc-btn" id="confirm-create-world-btn">Create New World</button>
+        <button class="mc-btn" id="cancel-create-world-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- How to Play Screen Modal -->
+  <div id="how-to-play-screen" class="screen-modal hidden">
+    <div class="menu-dialog">
+      <h2 class="menu-title">How To Play</h2>
+      <div class="instructions-content">
+        <p><strong>Movement:</strong> Use <strong>WASD</strong> to walk, <strong>Space</strong> to jump, <strong>Shift</strong> to sneak.</p>
+        <p><strong>Mining & Building:</strong> Hold <strong>Left Click</strong> to mine blocks. <strong>Right Click</strong> to place blocks from your hotbar.</p>
+        <p><strong>Inventory & Crafting:</strong> Press <strong>E</strong> to open inventory. Place 4 wood logs to make planks, then craft a Crafting Table to unlock the 3x3 crafting grid!</p>
+        <p><strong>Creative Mode:</strong> Press <strong>F</strong> or double-tap Space to fly. You have infinite blocks and break things instantly.</p>
+        <p><strong>Sounds:</strong> All audio is generated in real-time with Web Audio API synthesizer. Click anywhere to activate audio!</p>
+      </div>
+      <button class="mc-btn full-width" id="close-how-to-play-btn">Back</button>
+    </div>
+  </div>
+
+  <!-- Loading Screen -->
+  <div id="loading-screen" class="screen-modal hidden">
+    <div class="loading-content">
+      <div class="loading-logo">MINECRAFT</div>
+      <div class="loading-bar-border">
+        <div id="loading-bar-fill"></div>
+      </div>
+      <div id="loading-status">Generating Terrain...</div>
+    </div>
+  </div>
+
+  <!-- Main Game Script -->
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
