@@ -1,52 +1,86 @@
 # Minecraft Web Edition
 
-A single-player, browser-based voxel sandbox built with TypeScript, Vite, and Three.js. The game renders procedural block terrain in WebGL and includes a survival-oriented player, inventory, crafting, mobs, and more.
+A block-building adventure that runs entirely in your browser. Explore procedurally generated terrain, gather resources, craft equipment, build shelters, and shape your own world in this single-player voxel sandbox powered by TypeScript, Three.js, and WebGL.
 
-## Play online
+> **An independent browser project — not affiliated with or endorsed by Mojang or Microsoft.**
 
-[**Play Minecraft Web Edition in your browser**](https://minecraft-web-2nn.pages.dev/)
+## Play instantly
 
-No installation or local setup is required. Open the link above to start playing.
+[**Launch Minecraft Web Edition →**](https://minecraft-web-2nn.pages.dev/)
 
-## Run locally
+No download, installation, or account is required. Open the live demo and start a world directly in your browser. Desktop and touch controls are supported through the in-game settings.
+
+## What you can do
+
+- **Explore living worlds** — Traverse procedurally generated terrain with caves, fluids, weather, day/night cycles, clouds, fog, and lighting effects.
+- **Mine and build** — Break blocks, collect materials, place structures, and turn raw resources into a base of your own.
+- **Survive and progress** — Manage health and hunger, gather food, craft tools and armor, gain experience, and face hostile mobs.
+- **Craft and trade** — Use the 2×2 and 3×3 crafting grids, smelt materials, store items in chests, trade with villagers, and enchant your gear.
+- **Choose your play style** — Play Survival for resource gathering and progression, or switch to Creative for flight, unlimited blocks, and instant building.
+- **Tune the experience** — Adjust render distance, resolution, field of view, frame rate, graphics quality, audio, weather, and touch controls.
+
+## Controls
+
+### Keyboard and mouse
+
+| Action | Control |
+| --- | --- |
+| Move | `W` `A` `S` `D` |
+| Jump | `Space` |
+| Sneak / descend while flying | `Shift` |
+| Look around | Mouse |
+| Mine / break a block | Hold left click |
+| Place a block / interact | Right click |
+| Select hotbar slot | `1`–`9` or mouse wheel |
+| Open inventory and crafting | `E` |
+| Drop held item | `Q` |
+| Change perspective | `C` |
+| Toggle debug information | `F3` |
+| Pause / close a window | `Esc` |
+| Toggle Creative flight | `F` |
+
+Touch controls, virtual movement controls, pinch-to-zoom, and touch sensitivity settings are available in **Options → Touch & Controls**.
+
+## Run it locally
+
+You need Node.js and npm installed.
 
 ```sh
 npm install
 npm run dev
 ```
 
-Open the local Vite address printed in the terminal (normally `http://localhost:5173`).
+Open the Vite URL printed in the terminal, usually `http://localhost:5173`.
+
+Useful commands:
 
 ```sh
-npm test       # unit and logic tests
-npm run build  # TypeScript check and production build
-npm run preview
+npm test       # run the headless logic tests
+npm run build  # type-check and create a production build
+npm run preview # preview the production build locally
 ```
-
-## Controls
-
-- `W`, `A`, `S`, `D`: move; `Space`: jump; `Shift`: sneak
-- Mouse: look; hold left click to mine; right click to place or interact
-- `1`–`9` / mouse wheel: hotbar; `E`: inventory; `Q`: drop item
-- `C`: camera mode; `F3`: debug info; `Esc`: pause; `F`: creative flight
-
-Touch controls are available through the game settings.
 
 ## Project map
 
-- `src/main.ts` — game composition, render loop, and application lifecycle
-- `src/world/` — block definitions, noise/terrain generation, chunks, fluids, and world streaming
+- `src/main.ts` — application composition, render loop, and lifecycle
+- `src/world/` — blocks, procedural terrain, chunks, fluids, and world streaming
 - `src/player/` — movement, collision, input, and player model
-- `src/gameplay/` — inventory, crafting, block interaction, furnaces, chests, redstone, weather, and progression
+- `src/gameplay/` — inventory, crafting, interaction, furnaces, chests, redstone, weather, and progression
 - `src/entities/` — mobs and projectiles
-- `src/ui/` — menus, HUD, inventories, and overlays
-- `src/textures/`, `src/audio/`, `src/shaders/` — procedural textures, synthesized sound, and post-processing
-- `test/minecraft.test.ts` — headless logic tests
+- `src/ui/` — title screen, menus, HUD, inventory, and overlays
+- `src/textures/`, `src/audio/`, `src/shaders/` — procedural textures, synthesized audio, and visual effects
+- `test/minecraft.test.ts` — headless gameplay and logic tests
 
-## Current limitations
+## Current status and limitations
 
-- The game is local single-player only; it has no networking or multiplayer server.
-- The world selection screen stores world metadata in browser local storage. It does not yet persist player inventory, terrain edits, loaded chunks, or all runtime state.
-- Tests focus on headless logic. There is not yet an automated browser-level gameplay test suite.
-- Graphics settings cap the internal render buffer at 1920×1080 for predictable memory and GPU usage; the browser still displays the canvas at the viewport size.
-- `dist/` is a generated build output and is not source-controlled.
+This is an actively developed single-player browser game. The live build is playable, but it is not a multiplayer server or a replacement for the official Minecraft game.
+
+- There is currently no networking or multiplayer support.
+- World metadata is stored in browser local storage. Player inventory, terrain edits, loaded chunks, and all runtime state are not yet fully persisted.
+- The automated test suite focuses on headless game logic; browser-level gameplay tests are not yet included.
+- The internal render buffer is capped at 1920×1080 to keep GPU and memory usage predictable. The canvas still adapts to the browser viewport.
+- The production `dist/` directory is generated during builds and is not committed.
+
+## Built with
+
+[TypeScript](https://www.typescriptlang.org/) · [Vite](https://vitejs.dev/) · [Three.js](https://threejs.org/) · WebGL · Web Audio API
