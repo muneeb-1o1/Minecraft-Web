@@ -1,6 +1,12 @@
 # Minecraft Web Edition
 
-A single-player, browser-based voxel sandbox built with TypeScript, Vite, and Three.js. The game renders procedural block terrain in WebGL and includes a survival-oriented player, inventory, crafting, mobs, weather, fluids, UI screens, and several interactive block systems.
+A single-player, browser-based voxel sandbox built with TypeScript, Vite, and Three.js. The game renders procedural block terrain in WebGL and includes a survival-oriented player, inventory, crafting, mobs, and more.
+
+## Play online
+
+[**Play Minecraft Web Edition in your browser**](https://minecraft-web-2nn.pages.dev/)
+
+No installation or local setup is required. Open the link above to start playing.
 
 ## Run locally
 
